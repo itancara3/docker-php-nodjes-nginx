@@ -1,0 +1,38 @@
+{
+  "name": "PHP Dev Container",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "php",
+  "workspaceFolder": "/usr/share/nginx/html",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "felixfbecker.php-intellisense",
+        "open-southeners.laravel-pint",
+        "amiralizadeh9480.laravel-extra-intellisense"
+      ],
+      "settings": {
+        // Enable the extension we installed
+        "laravel-pint.enable": true,
+        // Define the new formatting extension as the default
+        // formatter for all PHP files
+        "[php]": {
+          "editor.defaultFormatter": "open-southeners.laravel-pint"
+        },
+        // Enable VsCode Format on Save
+        "editor.formatOnSave": true,
+        "editor.rulers": [
+          {
+            "column": 120,
+            "color": "#FF6D00"
+          },
+          {
+            "column": 150,
+            "color": "#D50000"
+          }
+        ]
+      }
+    }
+  },
+  "postStartCommand": "cd backend-base && php artisan serve"
+}
