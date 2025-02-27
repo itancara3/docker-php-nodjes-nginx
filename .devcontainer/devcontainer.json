@@ -33,6 +33,5 @@
         ]
       }
     }
-  },
-  "postStartCommand": "cd backend-base && php artisan serve"
+  }
 }
