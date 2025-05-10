@@ -10,6 +10,12 @@ RUN docker-php-ext-install pdo pdo_mysql
 RUN apt-get update && apt-get install -y libpq-dev \
   && docker-php-ext-install pdo pdo_pgsql
 
+RUN pecl install xdebug \
+  # Para que funcionen los sockets en laravel
+  && docker-php-ext-install pcntl \
+  # Para que funcione el xdebug
+  && docker-php-ext-enable xdebug
+
 RUN apt-get update && \
   apt-get upgrade -y && \
   apt-get install -y git
@@ -29,6 +35,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
+COPY ./php/xdebug/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 # Instala Composer
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 

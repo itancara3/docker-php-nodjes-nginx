@@ -9,9 +9,12 @@
         "bmewburn.vscode-intelephense-client",
         "felixfbecker.php-intellisense",
         "open-southeners.laravel-pint",
-        "amiralizadeh9480.laravel-extra-intellisense"
+        "amiralizadeh9480.laravel-extra-intellisense",
+        "xdebug.php-debug",
+        "Vue.volar"
       ],
       "settings": {
+        "php.validate.executablePath": "/usr/local/bin/php",
         // Enable the extension we installed
         "laravel-pint.enable": true,
         // Define the new formatting extension as the default
