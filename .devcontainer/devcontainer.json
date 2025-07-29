@@ -14,6 +14,11 @@
         "Vue.volar"
       ],
       "settings": {
+        "workbench.colorCustomizations": {
+          "titleBar.activeBackground": "#13293d",
+          "titleBar.inactiveBackground": "#13293d",
+          "activityBar.background": "#13293d",
+        },
         "php.validate.executablePath": "/usr/local/bin/php",
         // Enable the extension we installed
         "laravel-pint.enable": true,
