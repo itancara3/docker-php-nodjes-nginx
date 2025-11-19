@@ -2,7 +2,13 @@
   "name": "PHP Dev Container",
   "dockerComposeFile": "docker-compose.yml",
   "service": "php",
-  "workspaceFolder": "/usr/share/nginx/html",
+  "workspaceFolder": "/usr/share/nginx/html/core4-back",
+  "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,readonly"
+  ],
+  "remoteEnv": {
+    "GIT_SSH_COMMAND": "ssh -i /root/.ssh/id_ed25519 -o StrictHostKeyChecking=no"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
@@ -11,9 +17,12 @@
         "open-southeners.laravel-pint",
         "amiralizadeh9480.laravel-extra-intellisense",
         "xdebug.php-debug",
+        "eamodio.gitlens",
+        "Codeium.codeium",
         "Vue.volar"
       ],
       "settings": {
+        "git.path": "/usr/bin/git",
         "php.validate.executablePath": "/usr/local/bin/php",
         // Enable the extension we installed
         "laravel-pint.enable": true,
@@ -36,5 +45,6 @@
         ]
       }
     }
-  }
+  },
+  "postAttachCommand": []
 }

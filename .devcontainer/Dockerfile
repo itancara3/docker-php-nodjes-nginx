@@ -1,46 +1,88 @@
-FROM node:current-alpine as node
-FROM composer:latest as composer
+# =============================
+# PHP 8.4 FPM (Alpine) + Node + Composer + Zsh + Laravel
+# =============================
 
-# Usa la imagen base de PHP
-FROM php:8.4-fpm
+FROM php:8.4-fpm-alpine
 
-# Instala extensiones necesarias
-RUN docker-php-ext-install pdo pdo_mysql
+ARG INSTALL_XDEBUG=true
 
-RUN apt-get update && apt-get install -y libpq-dev \
-  && docker-php-ext-install pdo pdo_pgsql
+ENV COMPOSER_ALLOW_SUPERUSER=1 \
+  COMPOSER_HOME=/root/.composer \
+  PATH="/root/.composer/vendor/bin:${PATH}" \
+  SHELL=/bin/zsh
 
-RUN pecl install xdebug \
-  # Para que funcionen los sockets en laravel
-  && docker-php-ext-install pcntl \
-  # Para que funcione el xdebug
-  && docker-php-ext-enable xdebug
+# --- System packages & PHP extensions ---
+RUN set -eux; \
+  apk add --no-cache \
+  git curl ca-certificates gnupg unzip zip p7zip wget \
+  libzip-dev zlib-dev postgresql-dev \
+  freetype-dev libjpeg-turbo-dev libpng-dev \
+  icu-dev openssh-client \
+  oniguruma-dev \
+  nodejs npm zsh; \
+  \
+  # Headers de kernel NECESARIOS para compilar ext/sockets en Alpine
+  apk add --no-cache --virtual .kernel-headers linux-headers; \
+  \
+  docker-php-ext-configure zip; \
+  docker-php-ext-configure gd --with-freetype --with-jpeg; \
+  docker-php-ext-install -j"$(nproc)" \
+  pdo pdo_mysql pdo_pgsql \
+  zip gd intl pcntl opcache mbstring \
+  sockets; \
+  \
+  # PECL (con toolchain) y limpieza
+  apk add --no-cache --virtual .build-deps $PHPIZE_DEPS; \
+  if [ "$INSTALL_XDEBUG" = "true" ]; then \
+  pecl install xdebug; \
+  docker-php-ext-enable xdebug; \
+  fi; \
+  pecl install redis; \
+  docker-php-ext-enable redis; \
+  rm -rf /tmp/pear; \
+  apk del .build-deps .kernel-headers; \
+  \
+  # Zsh por defecto
+  sed -i 's#/bin/ash#/bin/zsh#' /etc/passwd
 
-RUN apt-get update && \
-  apt-get upgrade -y && \
-  apt-get install -y git
+# --- Composer from official image (sólido y simple) ---
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends p7zip-full && \
-  apt-get install zip unzip && \
-  apt-get clean && \
-  rm -rf /var/lib/apt/lists/* && \
-  7z -h
+# --- Laravel installer (global) ---
+RUN set -eux; \
+  composer --version; \
+  composer global require --no-interaction --no-progress laravel/installer:^5
 
-ENV PATH="/root/.composer/vendor/bin:$PATH"
+# --- PHP & Zsh configs (si están en el contexto) ---
+COPY ./php/php.ini /usr/local/etc/php/php.ini
+COPY ./php/xdebug/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+COPY ./shell/.zshrc /root/.zshrc
 
-# Instala nodejs
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-  apt-get install -y nodejs && \
-  apt-get clean && \
-  rm -rf /var/lib/apt/lists/*
+# =============================
+# 👇 ADICIONES MÍNIMAS PARA BROWSERSHOT / PUPPETEER
+# =============================
 
-COPY ./php/xdebug/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
-# Instala Composer
-COPY --from=composer /usr/bin/composer /usr/bin/composer
+# 1) Instalar Chromium nativo + dependencias de render y fuentes
+RUN set -eux; \
+  apk add --no-cache \
+  chromium \
+  nss \
+  harfbuzz \
+  freetype \
+  ttf-freefont \
+  font-noto-emoji; \
+  # En Alpine el binario puede ser /usr/bin/chromium o /usr/bin/chromium-browser
+  if [ ! -x /usr/bin/chromium-browser ]; then ln -s /usr/bin/chromium /usr/bin/chromium-browser; fi
 
-# Expone las dependencias globales
-RUN composer global require laravel/installer
+# 2) Evitar que Puppeteer descargue su propio Chrome (que puede ser de otra arquitectura)
+ENV PUPPETEER_SKIP_DOWNLOAD=true
 
-# Establece el directorio de trabajo
-WORKDIR /usr/share/nginx/html
+# 3) (Opcional pero útil) Exponer la ruta por defecto para Laravel/Browsershot
+ENV BROWSERSHOT_CHROME_PATH=/usr/bin/chromium-browser \
+  BROWSERSHOT_NODE_PATH=/usr/bin/node \
+  BROWSERSHOT_NPM_PATH=/usr/bin/npm
+
+# --- Workdir / Expose / CMD ---
+WORKDIR /var/www/html
+EXPOSE 9000
+CMD ["php-fpm"]
