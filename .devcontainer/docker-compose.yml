@@ -2,7 +2,7 @@ services:
   php:
     platform: "linux/arm64/v8"
     environment:
-      PUPPETEER_SKIP_DOWNLOAD: "true"
+      PUPPETEER_SKIP_DOWNLOAD: "false"
       PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium-browser"
       BROWSERSHOT_CHROME_PATH: "/usr/bin/chromium-browser"
       NODE_BINARY: "/usr/bin/node"

@@ -19,7 +19,8 @@ RUN set -eux; \
   freetype-dev libjpeg-turbo-dev libpng-dev \
   icu-dev openssh-client \
   oniguruma-dev \
-  nodejs npm zsh; \
+  nodejs npm zsh \
+  libfaketime; \
   \
   # Headers de kernel NECESARIOS para compilar ext/sockets en Alpine
   apk add --no-cache --virtual .kernel-headers linux-headers; \
@@ -45,7 +46,7 @@ RUN set -eux; \
   # Zsh por defecto
   sed -i 's#/bin/ash#/bin/zsh#' /etc/passwd
 
-# --- Composer from official image (sólido y simple) ---
+# --- Composer from official image ---
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 # --- Laravel installer (global) ---
@@ -53,16 +54,16 @@ RUN set -eux; \
   composer --version; \
   composer global require --no-interaction --no-progress laravel/installer:^5
 
-# --- PHP & Zsh configs (si están en el contexto) ---
+# --- PHP & Zsh configs ---
 COPY ./php/php.ini /usr/local/etc/php/php.ini
 COPY ./php/xdebug/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 COPY ./shell/.zshrc /root/.zshrc
 
 # =============================
-# 👇 ADICIONES MÍNIMAS PARA BROWSERSHOT / PUPPETEER
+# 👇 BROWSERSHOT / PUPPETEER
 # =============================
 
-# 1) Instalar Chromium nativo + dependencias de render y fuentes
+# 1) Chromium + fuentes (ya lo tenías bien)
 RUN set -eux; \
   apk add --no-cache \
   chromium \
@@ -72,17 +73,29 @@ RUN set -eux; \
   ttf-freefont \
   font-noto-emoji; \
   # En Alpine el binario puede ser /usr/bin/chromium o /usr/bin/chromium-browser
-  if [ ! -x /usr/bin/chromium-browser ]; then ln -s /usr/bin/chromium /usr/bin/chromium-browser; fi
+  if [ ! -x /usr/bin/chromium ]; then ln -s /usr/bin/chromium /usr/bin/chromium; fi
 
-# 2) Evitar que Puppeteer descargue su propio Chrome (que puede ser de otra arquitectura)
-ENV PUPPETEER_SKIP_DOWNLOAD=true
+# 2) Forzar a Puppeteer a NO descargar Chrome y a usar el Chromium del sistema
+ENV PUPPETEER_SKIP_DOWNLOAD=true \
+  PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# 3) (Opcional pero útil) Exponer la ruta por defecto para Laravel/Browsershot
-ENV BROWSERSHOT_CHROME_PATH=/usr/bin/chromium-browser \
+# 3) Instalar Puppeteer DENTRO del contenedor (no en tu Mac)
+RUN set -eux; \
+  npm install -g puppeteer; \
+  npm cache clean --force
+
+# 4) Rutas para Browsershot (opcional, pero muy útil)
+ENV BROWSERSHOT_CHROME_PATH=/usr/bin/chromium \
   BROWSERSHOT_NODE_PATH=/usr/bin/node \
   BROWSERSHOT_NPM_PATH=/usr/bin/npm
 
 # --- Workdir / Expose / CMD ---
 WORKDIR /var/www/html
 EXPOSE 9000
+
+# ENV LD_PRELOAD=/usr/lib/faketime/libfaketime.so.1
+# ENV FAKETIME="@2025-01-01 15:30:00"
+
+# RUN export FAKETIME="@2025-01-01 15:30:00"
+
 CMD ["php-fpm"]
