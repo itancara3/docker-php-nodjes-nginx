@@ -16,6 +16,7 @@ services:
       - "9003:9003"  # Puerto para Xdebug
       - "4173:4173"
       - "4000:4000"
+      - "5175:5175"
     depends_on:
       - nginx
       - mysql
