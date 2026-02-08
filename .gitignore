@@ -1,2 +1,15 @@
-app/*
-database/*
+# Project source volumes
+volumes-projects/nginx/*
+!volumes-projects/nginx/.gitkeep
+volumes-projects/apache/*
+!volumes-projects/apache/.gitkeep
+
+# Data volumes
+volumes-data/mysql/*
+!volumes-data/mysql/.gitkeep
+volumes-data/postgresql/*
+!volumes-data/postgresql/.gitkeep
+volumes-data/redis/*
+!volumes-data/redis/.gitkeep
+
+.env

@@ -1,14 +1,21 @@
 {
   "name": "PHP Dev Container",
-  "dockerComposeFile": "docker-compose.yml",
+  "dockerComposeFile": [
+    "../docker-compose.yml"
+  ],
   "service": "php",
-  "workspaceFolder": "/usr/share/nginx/html/core4-back",
+  "runServices": [
+    "php",
+    "nginx",
+    "apache",
+    "mysql",
+    "postgresql",
+    "redis"
+  ],
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "mounts": [
     "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,readonly"
   ],
-  "containerEnv": {
-    "LD_PRELOAD": "/usr/lib/faketime/libfaketime.so.1"
-  },
   "remoteEnv": {
     "GIT_SSH_COMMAND": "ssh -i /root/.ssh/id_ed25519 -o StrictHostKeyChecking=no"
   },
@@ -27,14 +34,10 @@
       "settings": {
         "git.path": "/usr/bin/git",
         "php.validate.executablePath": "/usr/local/bin/php",
-        // Enable the extension we installed
         "laravel-pint.enable": true,
-        // Define the new formatting extension as the default
-        // formatter for all PHP files
         "[php]": {
           "editor.defaultFormatter": "open-southeners.laravel-pint"
         },
-        // Enable VsCode Format on Save
         "editor.formatOnSave": true,
         "editor.rulers": [
           {
