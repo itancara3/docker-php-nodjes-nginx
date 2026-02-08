@@ -21,6 +21,7 @@ Rutas dentro de contenedores:
 - Nginx document root: `/var/www/nginx`
 - Apache document root: `/var/www/apache`
 - PHP monta ambos paths para ejecutar codigo de los dos stacks
+- PHP monta ademas `/var/www/workspace` segun `WEB_SERVER` (`nginx` o `apache`)
 
 Ejemplo:
 
@@ -34,16 +35,24 @@ Datos persistentes en el host:
 - PostgreSQL: `./volumes-data/postgresql`
 - Redis: `./volumes-data/redis`
 
-## Dev Containers (VSCode)
-El workspace del contenedor abre este repositorio (`/workspaces/...`), por lo que puedes editar infraestructura y proyectos en:
+## Seleccionar stack web activo
+En `.env` configura:
 
-- `volumes-projects/nginx`
-- `volumes-projects/apache`
+- `WEB_SERVER=nginx` para abrir `./volumes-projects/nginx` en el workspace del Dev Container
+- `WEB_SERVER=apache` para abrir `./volumes-projects/apache` en el workspace del Dev Container
+
+Si cambias `WEB_SERVER`, reconstruye los contenedores para refrescar el bind mount.
+
+## Dev Containers (VSCode)
+El Dev Container abre `/var/www/workspace`, que apunta al volumen elegido por `WEB_SERVER`.
+
+El repositorio de infraestructura sigue disponible en `/workspaces/<nombre-del-repo>`.
 
 Xdebug ya incluye mapeos para ambos roots remotos:
 
-- `/var/www/nginx` -> `${workspaceFolder}/volumes-projects/nginx`
-- `/var/www/apache` -> `${workspaceFolder}/volumes-projects/apache`
+- `/var/www/workspace` -> `/var/www/workspace`
+- `/var/www/nginx` -> `/var/www/nginx`
+- `/var/www/apache` -> `/var/www/apache`
 
 ## PHP por version
 Cada version de PHP tiene su propia carpeta:

@@ -1,8 +1,10 @@
 # Project source volumes
 volumes-projects/nginx/*
 !volumes-projects/nginx/.gitkeep
+!volumes-projects/nginx/phpinfo.php
 volumes-projects/apache/*
 !volumes-projects/apache/.gitkeep
+!volumes-projects/apache/phpinfo.php
 
 # Data volumes
 volumes-data/mysql/*

@@ -40,8 +40,8 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
     PUPPETEER_SKIP_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     BROWSERSHOT_CHROME_PATH=/usr/bin/chromium \
-    BROWSERSHOT_NODE_PATH=/usr/bin/node \
-    BROWSERSHOT_NPM_PATH=/usr/bin/npm
+    BROWSERSHOT_NODE_PATH=/usr/local/bin/node \
+    BROWSERSHOT_NPM_PATH=/usr/local/bin/npm
 
 RUN set -eux; \
     apt-get update; \
@@ -67,9 +67,13 @@ RUN set -eux; \
 COPY --from=build_ext /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 COPY --from=build_ext /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 COPY --from=node_runtime /usr/local/bin/node /usr/local/bin/node
-COPY --from=node_runtime /usr/local/bin/npm /usr/local/bin/npm
-COPY --from=node_runtime /usr/local/bin/npx /usr/local/bin/npx
 COPY --from=node_runtime /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN set -eux; \
+    ln -sf ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm; \
+    ln -sf ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx; \
+    ln -sf /usr/local/bin/node /usr/bin/node; \
+    ln -sf /usr/local/bin/npm /usr/bin/npm; \
+    ln -sf /usr/local/bin/npx /usr/bin/npx
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 COPY docker/php/common/shell/.zshrc /root/.zshrc

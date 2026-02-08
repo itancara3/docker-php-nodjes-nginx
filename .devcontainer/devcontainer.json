@@ -12,13 +12,10 @@
     "postgresql",
     "redis"
   ],
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "workspaceFolder": "/var/www/workspace",
   "mounts": [
     "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,readonly"
   ],
-  "remoteEnv": {
-    "GIT_SSH_COMMAND": "ssh -i /root/.ssh/id_ed25519 -o StrictHostKeyChecking=no"
-  },
   "customizations": {
     "vscode": {
       "extensions": [
@@ -29,7 +26,8 @@
         "xdebug.php-debug",
         "eamodio.gitlens",
         "Codeium.codeium",
-        "Vue.volar"
+        "Vue.volar",
+        "openai.chatgpt"
       ],
       "settings": {
         "git.path": "/usr/bin/git",

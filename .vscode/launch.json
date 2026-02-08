@@ -7,8 +7,9 @@
       "request": "launch",
       "port": 9003,
       "pathMappings": {
-        "/var/www/nginx": "${workspaceFolder}/volumes-projects/nginx",
-        "/var/www/apache": "${workspaceFolder}/volumes-projects/apache"
+        "/var/www/workspace": "/var/www/workspace",
+        "/var/www/nginx": "/var/www/nginx",
+        "/var/www/apache": "/var/www/apache"
       },
       "log": true
     }
