@@ -18,7 +18,7 @@ services:
     volumes:
       - ./volumes-projects/nginx:/var/www/nginx
       - ./volumes-projects/apache:/var/www/apache
-      - ./volumes-projects/${WEB_SERVER:-nginx}:/var/www/workspace
+      - ./volumes-projects/${WEB_SERVER:-nginx}/${WEB_PROJECT_DIR:-.}:/var/www/workspace
     ports:
       - "${XDEBUG_PORT:-9003}:9003"
       - "4173:4173"

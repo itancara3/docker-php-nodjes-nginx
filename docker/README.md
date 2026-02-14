@@ -21,7 +21,7 @@ Rutas dentro de contenedores:
 - Nginx document root: `/var/www/nginx`
 - Apache document root: `/var/www/apache`
 - PHP monta ambos paths para ejecutar codigo de los dos stacks
-- PHP monta ademas `/var/www/workspace` segun `WEB_SERVER` (`nginx` o `apache`)
+- PHP monta ademas `/var/www/workspace` segun `WEB_SERVER` (`nginx` o `apache`) y `WEB_PROJECT_DIR`
 
 Ejemplo:
 
@@ -38,13 +38,18 @@ Datos persistentes en el host:
 ## Seleccionar stack web activo
 En `.env` configura:
 
-- `WEB_SERVER=nginx` para abrir `./volumes-projects/nginx` en el workspace del Dev Container
-- `WEB_SERVER=apache` para abrir `./volumes-projects/apache` en el workspace del Dev Container
+- `WEB_SERVER=nginx` o `WEB_SERVER=apache`
+- `WEB_PROJECT_DIR=.` para abrir la raiz del stack elegido:
+  - `./volumes-projects/nginx` si `WEB_SERVER=nginx`
+  - `./volumes-projects/apache` si `WEB_SERVER=apache`
+- `WEB_PROJECT_DIR=inventario-polar` para abrir una subcarpeta del stack elegido:
+  - `./volumes-projects/nginx/inventario-polar` si `WEB_SERVER=nginx`
+  - `./volumes-projects/apache/inventario-polar` si `WEB_SERVER=apache`
 
-Si cambias `WEB_SERVER`, reconstruye los contenedores para refrescar el bind mount.
+Si cambias `WEB_SERVER` o `WEB_PROJECT_DIR`, reconstruye los contenedores para refrescar el bind mount.
 
 ## Dev Containers (VSCode)
-El Dev Container abre `/var/www/workspace`, que apunta al volumen elegido por `WEB_SERVER`.
+El Dev Container abre `/var/www/workspace`, que apunta al volumen elegido por `WEB_SERVER` + `WEB_PROJECT_DIR`.
 
 El repositorio de infraestructura sigue disponible en `/workspaces/<nombre-del-repo>`.
 

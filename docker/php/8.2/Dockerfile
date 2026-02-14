@@ -10,13 +10,13 @@ RUN set -eux; \
       ca-certificates \
       libzip-dev zlib1g-dev libpq-dev \
       libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
-      libicu-dev libonig-dev \
+      libicu-dev libonig-dev libgmp-dev \
       $PHPIZE_DEPS; \
     docker-php-ext-configure zip; \
     docker-php-ext-configure gd --with-freetype --with-jpeg; \
     docker-php-ext-install -j"$(nproc)" \
       pdo pdo_mysql pdo_pgsql \
-      zip gd intl pcntl opcache mbstring sockets; \
+      zip gd intl pcntl opcache mbstring sockets bcmath gmp; \
     pecl install redis; \
     docker-php-ext-enable redis; \
     if [ "$INSTALL_XDEBUG" = "true" ]; then \
@@ -48,7 +48,7 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
       git curl ca-certificates unzip zip p7zip-full wget \
       zsh openssh-client \
-      libzip4 zlib1g libpq5 \
+      libzip4 zlib1g libpq5 libgmp10 \
       libfreetype6 libjpeg62-turbo libpng16-16 libicu72 libonig5; \
     if [ "$INSTALL_BROWSER_TOOLS" = "true" ]; then \
       apt-get install -y --no-install-recommends \
