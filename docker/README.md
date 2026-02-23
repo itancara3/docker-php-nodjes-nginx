@@ -64,6 +64,7 @@ Cada version de PHP tiene su propia carpeta:
 
 - `docker/php/8.4/`
 - `docker/php/8.2/`
+- `docker/php/7.4/`
 
 Cada una incluye:
 
@@ -77,7 +78,7 @@ Configuracion compartida de shell:
 
 ## Cambiar version de PHP
 1. Copia `.env.example` a `.env`.
-2. Cambia `PHP_VERSION` (`8.4`, `8.2` o la que crees).
+2. Cambia `PHP_VERSION` (`8.4`, `8.2`, `7.4` o la que crees).
 3. Reconstruye:
 
 ```bash

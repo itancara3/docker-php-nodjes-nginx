@@ -1,4 +1,4 @@
-ARG PHP_IMAGE=php:8.4-fpm-bookworm
+ARG PHP_IMAGE=php:7.4-fpm-bullseye
 
 FROM ${PHP_IMAGE} AS build_ext
 
@@ -17,15 +17,15 @@ RUN set -eux; \
   docker-php-ext-install -j"$(nproc)" \
   pdo pdo_mysql pdo_pgsql \
   zip gd intl pcntl opcache mbstring sockets bcmath gmp; \
-  pecl install redis; \
+  pecl install redis-5.3.7; \
   docker-php-ext-enable redis; \
   if [ "$INSTALL_XDEBUG" = "true" ]; then \
-  pecl install xdebug; \
+  pecl install xdebug-3.1.6; \
   docker-php-ext-enable xdebug; \
   fi; \
   rm -rf /tmp/pear /var/lib/apt/lists/*
 
-FROM node:22-bookworm-slim AS node_runtime
+FROM node:22-bullseye-slim AS node_runtime
 
 FROM ${PHP_IMAGE} AS runtime
 
@@ -49,7 +49,7 @@ RUN set -eux; \
   git curl ca-certificates unzip zip p7zip-full wget \
   zsh openssh-client \
   libzip4 zlib1g libpq5 libgmp10 \
-  libfreetype6 libjpeg62-turbo libpng16-16 libicu72 libonig5; \
+  libfreetype6 libjpeg62-turbo libpng16-16 libicu67 libonig5; \
   if [ "$INSTALL_BROWSER_TOOLS" = "true" ]; then \
   apt-get install -y --no-install-recommends \
   chromium \
@@ -77,8 +77,8 @@ RUN set -eux; \
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 COPY docker/php/common/shell/.zshrc /root/.zshrc
-COPY docker/php/8.4/php.ini /usr/local/etc/php/php.ini
-COPY docker/php/8.4/xdebug.ini /tmp/xdebug.ini
+COPY docker/php/7.4/php.ini /usr/local/etc/php/php.ini
+COPY docker/php/7.4/xdebug.ini /tmp/xdebug.ini
 
 RUN set -eux; \
   if [ "$INSTALL_XDEBUG" = "true" ]; then \

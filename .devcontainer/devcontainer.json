@@ -14,7 +14,8 @@
   ],
   "workspaceFolder": "/var/www/workspace",
   "mounts": [
-    "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,readonly"
+    "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,readonly",
+    "source=${localEnv:HOME}/.codex,target=/root/.codex,type=bind,readonly"
   ],
   "customizations": {
     "vscode": {
