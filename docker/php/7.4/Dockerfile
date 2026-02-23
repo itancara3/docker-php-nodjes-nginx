@@ -25,7 +25,7 @@ RUN set -eux; \
   fi; \
   rm -rf /tmp/pear /var/lib/apt/lists/*
 
-FROM node:22-bullseye-slim AS node_runtime
+FROM node:20.12.2-bullseye-slim AS node_runtime
 
 FROM ${PHP_IMAGE} AS runtime
 
@@ -86,7 +86,7 @@ RUN set -eux; \
   fi; \
   rm -f /tmp/xdebug.ini; \
   composer --version; \
-  composer global require --no-interaction --no-progress laravel/installer:^5; \
+  composer global require --no-interaction --no-progress laravel/installer:^4; \
   if [ "$INSTALL_PUPPETEER" = "true" ]; then \
   npm install -g puppeteer; \
   npm install -g @quasar/cli; \
