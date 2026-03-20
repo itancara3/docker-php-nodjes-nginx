@@ -1,12 +1,12 @@
 {
-  "name": "PHP (7.4/8.2/8.4) + Nginx Dev Container",
+  "name": "PHP (7.4/8.2/8.4) + Apache Dev Container",
   "dockerComposeFile": [
-    "../docker-compose.yml"
+    "../../docker-compose.yml"
   ],
-  "service": "php-nginx",
+  "service": "php-apache",
   "runServices": [
-    "php-nginx",
-    "nginx"
+    "php-apache",
+    "apache"
   ],
   "initializeCommand": "make -C \"${localWorkspaceFolder}\" devcontainer-init",
   "shutdownAction": "none",

@@ -90,6 +90,7 @@ RUN set -eux; \
   if [ "$INSTALL_PUPPETEER" = "true" ]; then \
   npm install -g puppeteer; \
   npm install -g @quasar/cli; \
+  npm i -g @nestjs/cli; \
   npm cache clean --force; \
   fi
 
