@@ -1,12 +1,13 @@
 services:
   php:
-    platform: "linux/arm64/v8"
     environment:
       PUPPETEER_SKIP_DOWNLOAD: "false"
-      PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium-browser"
-      BROWSERSHOT_CHROME_PATH: "/usr/bin/chromium-browser"
+      PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium"
+      BROWSERSHOT_CHROME_PATH: "/usr/bin/chromium"
       NODE_BINARY: "/usr/bin/node"
       NPM_BINARY: "/usr/bin/npm"
+    mem_limit: 16g
+    cpus: 8
     build:
       dockerfile: ./Dockerfile
     container_name: PHP-NODEJS
@@ -16,6 +17,7 @@ services:
       - "9003:9003"  # Puerto para Xdebug
       - "4173:4173"
       - "4000:4000"
+      - "8080:8080"
       - "5175:5175"
     depends_on:
       - nginx
@@ -24,8 +26,7 @@ services:
       - app-network
 
   nginx:
-    platform: "linux/arm64/v8"
-    image: nginx
+    image: nginx:1.25-alpine
     restart: always
     container_name: NGINX
     volumes:
@@ -37,8 +38,8 @@ services:
       - app-network
 
   mysql:
-    platform: "linux/arm64/v8"
-    image: mysql
+    platform: linux/amd64
+    image: mysql:8.0.36-debian
     restart: always
     container_name: MYSQL
     ports:
@@ -52,8 +53,8 @@ services:
       - app-network
 
   postgresql:
-    platform: "linux/arm64/v8"
-    image: postgres:17.2
+    platform: linux/amd64
+    image: postgres:15-alpine
     restart: always
     container_name: POSTGRES
     ports:
@@ -68,7 +69,6 @@ services:
 
 
   redis:
-    platform: "linux/arm64/v8"
     image: redis:7.2-alpine
     restart: always
     container_name: REDIS

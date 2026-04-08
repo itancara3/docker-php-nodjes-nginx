@@ -1,101 +1,82 @@
 # =============================
-# PHP 8.4 FPM (Alpine) + Node + Composer + Zsh + Laravel
+# Stage 1: Base (PHP + sistema)
 # =============================
-
-FROM php:8.4-fpm-alpine
+FROM php:8.3.6-fpm-bullseye AS base
 
 ARG INSTALL_XDEBUG=true
 
 ENV COMPOSER_ALLOW_SUPERUSER=1 \
   COMPOSER_HOME=/root/.composer \
   PATH="/root/.composer/vendor/bin:${PATH}" \
-  SHELL=/bin/zsh
+  SHELL=/bin/zsh \
+  DEBIAN_FRONTEND=noninteractive
 
-# --- System packages & PHP extensions ---
-RUN set -eux; \
-  apk add --no-cache \
-  git curl ca-certificates gnupg unzip zip p7zip wget \
-  libzip-dev zlib-dev postgresql-dev \
-  freetype-dev libjpeg-turbo-dev libpng-dev \
-  icu-dev openssh-client \
-  oniguruma-dev \
-  nodejs npm zsh \
-  libfaketime; \
-  \
-  # Headers de kernel NECESARIOS para compilar ext/sockets en Alpine
-  apk add --no-cache --virtual .kernel-headers linux-headers; \
-  \
-  docker-php-ext-configure zip; \
-  docker-php-ext-configure gd --with-freetype --with-jpeg; \
-  docker-php-ext-install -j"$(nproc)" \
+# --- System & PHP deps ---
+RUN apt-get update && apt-get install -y openssh-client && apt-get install -y nano && apt-get install -y --no-install-recommends \
+  git curl unzip zip gnupg2 wget sudo \
+  zlib1g-dev libzip-dev libonig-dev libpq-dev \
+  libpng-dev libjpeg-dev libfreetype6-dev libicu-dev \
+  ca-certificates gnupg software-properties-common zsh bash \
+  chromium fonts-dejavu fonts-noto-color-emoji \
+  libx11-dev libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxi6 libxtst6 libnss3 \
+  libxrandr2 libasound2 libpangocairo-1.0-0 libatk1.0-0 libcups2 libdrm2 libgbm1 libxss1 libgtk-3-0 \
+  && rm -rf /var/lib/apt/lists/*
+
+# --- Install Node.js 20.x ---
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+  && apt-get install -y nodejs \
+  && node -v && npm -v
+
+# --- PHP extensions ---
+RUN docker-php-ext-configure zip \
+  && docker-php-ext-configure gd --with-freetype --with-jpeg \
+  && docker-php-ext-install -j"$(nproc)" \
   pdo pdo_mysql pdo_pgsql \
-  zip gd intl pcntl opcache mbstring \
-  sockets; \
-  \
-  # PECL (con toolchain) y limpieza
-  apk add --no-cache --virtual .build-deps $PHPIZE_DEPS; \
-  if [ "$INSTALL_XDEBUG" = "true" ]; then \
-  pecl install xdebug; \
-  docker-php-ext-enable xdebug; \
-  fi; \
-  pecl install redis; \
-  docker-php-ext-enable redis; \
-  rm -rf /tmp/pear; \
-  apk del .build-deps .kernel-headers; \
-  \
-  # Zsh por defecto
-  sed -i 's#/bin/ash#/bin/zsh#' /etc/passwd
+  zip gd intl pcntl opcache mbstring sockets
 
-# --- Composer from official image ---
+# --- PECL: Xdebug & Redis ---
+RUN apt-get update && apt-get install -y --no-install-recommends $PHPIZE_DEPS \
+  && if [ "$INSTALL_XDEBUG" = "true" ]; then \
+  pecl install xdebug && docker-php-ext-enable xdebug; \
+  fi \
+  && pecl install redis && docker-php-ext-enable redis \
+  && apt-get purge -y --auto-remove $PHPIZE_DEPS \
+  && rm -rf /tmp/pear /var/lib/apt/lists/*
+
+# =============================
+# Stage 2: Final (tools + configs)
+# =============================
+FROM base AS final
+
+# --- Composer ---
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
-# --- Laravel installer (global) ---
-RUN set -eux; \
-  composer --version; \
-  composer global require --no-interaction --no-progress laravel/installer:^5
+# --- Laravel installer ---
+RUN composer global require --no-interaction --no-progress laravel/installer:^5 \
+  && composer clear-cache
 
-# --- PHP & Zsh configs ---
-COPY ./php/php.ini /usr/local/etc/php/php.ini
-COPY ./php/xdebug/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-COPY ./shell/.zshrc /root/.zshrc
+# --- Puppeteer (sin Chromium) ---
+ENV PUPPETEER_SKIP_DOWNLOAD=true
 
-# =============================
-# 👇 BROWSERSHOT / PUPPETEER
-# =============================
+RUN npm install -g puppeteer && npm cache clean --force
 
-# 1) Chromium + fuentes (ya lo tenías bien)
-RUN set -eux; \
-  apk add --no-cache \
-  chromium \
-  nss \
-  harfbuzz \
-  freetype \
-  ttf-freefont \
-  font-noto-emoji; \
-  # En Alpine el binario puede ser /usr/bin/chromium o /usr/bin/chromium-browser
-  if [ ! -x /usr/bin/chromium ]; then ln -s /usr/bin/chromium /usr/bin/chromium; fi
-
-# 2) Forzar a Puppeteer a NO descargar Chrome y a usar el Chromium del sistema
-ENV PUPPETEER_SKIP_DOWNLOAD=true \
-  PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-
-# 3) Instalar Puppeteer DENTRO del contenedor (no en tu Mac)
-RUN set -eux; \
-  npm install -g puppeteer; \
-  npm cache clean --force
-
-# 4) Rutas para Browsershot (opcional, pero muy útil)
+# --- Puppeteer/Browsershot config paths ---
 ENV BROWSERSHOT_CHROME_PATH=/usr/bin/chromium \
   BROWSERSHOT_NODE_PATH=/usr/bin/node \
   BROWSERSHOT_NPM_PATH=/usr/bin/npm
 
-# --- Workdir / Expose / CMD ---
-WORKDIR /var/www/html
+# --- PHP & Zsh Configs ---
+COPY ./php/php.ini /usr/local/etc/php/php.ini
+COPY ./php/xdebug/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+COPY ./shell/.zshrc /root/.zshrc
+
+# --- Git Config (útil en devcontainer/Windsurf) ---
+RUN git config --global user.email "ivan@pull.srl" \
+  && git config --global user.name "Ivan Tancara" \
+  && git config --global pull.rebase false
+
+# --- Workdir / Ports / CMD ---
+# WORKDIR /var/www/html
 EXPOSE 9000
-
-# ENV LD_PRELOAD=/usr/lib/faketime/libfaketime.so.1
-# ENV FAKETIME="@2025-01-01 15:30:00"
-
-# RUN export FAKETIME="@2025-01-01 15:30:00"
 
 CMD ["php-fpm"]
