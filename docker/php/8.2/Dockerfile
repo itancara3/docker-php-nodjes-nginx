@@ -47,7 +47,7 @@ RUN set -eux; \
   apt-get update; \
   apt-get install -y --no-install-recommends \
   git curl ca-certificates unzip zip p7zip-full wget \
-  zsh openssh-client \
+  zsh openssh-client nano vim-tiny \
   libzip4 zlib1g libpq5 libgmp10 \
   libfreetype6 libjpeg62-turbo libpng16-16 libicu72 libonig5; \
   if [ "$INSTALL_BROWSER_TOOLS" = "true" ]; then \
@@ -61,6 +61,7 @@ RUN set -eux; \
   libatk-bridge2.0-0 \
   libgtk-3-0; \
   fi; \
+  git config --global core.editor nano; \
   chsh -s /bin/zsh root; \
   rm -rf /var/lib/apt/lists/*
 
@@ -90,6 +91,7 @@ RUN set -eux; \
   if [ "$INSTALL_PUPPETEER" = "true" ]; then \
   npm install -g puppeteer; \
   npm install -g @quasar/cli; \
+  npm i -g opencode-ai; \
   npm i -g @nestjs/cli; \
   npm cache clean --force; \
   fi

@@ -109,7 +109,7 @@ make app-up
 ```
 
 ### 3. Abrir VSCode Dev Container
-El Dev Container solo administra el contenedor PHP y su web server asociado. Antes de arrancar, asegura automaticamente que la red `php-projects-shared-services` exista y levanta `mysql` + `postgresql` desde `docker-compose.infra.yml`. `redis` sigue siendo manual para no cargar servicios no siempre necesarios.
+El Dev Container solo administra el contenedor PHP y su web server asociado. Antes de arrancar, asegura automaticamente que la red `php-projects-shared-services` exista y levanta `mysql` + `postgresql` + `redis` desde `docker-compose.infra.yml`.
 
 ## Acceso desde el host
 Los servicios de datos se publican solo en loopback del host para evitar exposicion innecesaria:

@@ -6,7 +6,7 @@ network-up:
 	docker network inspect $(NETWORK_NAME) >/dev/null 2>&1 || docker network create --driver bridge $(NETWORK_NAME)
 
 devcontainer-init: network-up
-	docker compose -f docker-compose.infra.yml up -d mysql postgresql
+	docker compose -f docker-compose.infra.yml up -d mysql postgresql redis
 
 infra-up: network-up
 	docker compose -f docker-compose.infra.yml up -d

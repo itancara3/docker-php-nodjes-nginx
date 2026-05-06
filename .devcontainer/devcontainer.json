@@ -13,20 +13,25 @@
   "workspaceFolder": "/var/www/workspace",
   "mounts": [
     "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,readonly",
-    "source=${localEnv:HOME}/.codex,target=/root/.codex,type=bind,readonly"
+    "source=${localEnv:HOME}/.codex,target=/root/.codex,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude,target=/root/.claude,type=bind,readonly"
   ],
   "customizations": {
     "vscode": {
       "extensions": [
         "bmewburn.vscode-intelephense-client",
-        "felixfbecker.php-intellisense",
         "open-southeners.laravel-pint",
         "amiralizadeh9480.laravel-extra-intellisense",
+        "usernamehw.errorlens",
+        "mikestead.dotenv",
         "xdebug.php-debug",
         "eamodio.gitlens",
-        "Codeium.codeium",
-        "Vue.volar",
-        "openai.chatgpt"
+        "codeium.codeium",
+        "vue.volar",
+        "dbaeumer.vscode-eslint",
+        "openai.chatgpt",
+        "Anthropic.claude-code",
+        "humao.rest-client"
       ],
       "settings": {
         "git.path": "/usr/bin/git",
