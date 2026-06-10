@@ -13,9 +13,13 @@
   "workspaceFolder": "/var/www/workspace",
   "mounts": [
     "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,readonly",
-    "source=${localEnv:HOME}/.codex,target=/root/.codex,type=bind,readonly",
+    "source=${localEnv:HOME}/.config/git,target=/root/.config/git,type=bind,readonly",
+    "source=codex-devcontainer-state,target=/root/.codex,type=volume",
     "source=${localEnv:HOME}/.claude,target=/root/.claude,type=bind,readonly"
   ],
+  "containerEnv": {
+    "CODEX_HOME": "/root/.codex"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
